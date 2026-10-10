@@ -84,6 +84,14 @@
             commands: "ALL"
             sudoers_path: "/etc/sudoers.d"
 
+    - name: Enable lingering for the admin user
+      ansible.builtin.file:
+        path: "/var/lib/systemd/linger/{{ admin.name }}"
+        state: touch
+        owner: root
+        group: root
+        mode: "0644"
+
     - name: Lock root
       ansible.builtin.user:
         name: root
