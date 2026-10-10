@@ -1,0 +1,31 @@
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  disable_env_credential_login: true
+  alerting: ["email"]
+  use_redis_transaction_buffer: true
+
+litellm_settings:
+  cache: true
+  cache_params:
+    type: redis
+    namespace: "litellm"
+    ttl: 3600
+  callbacks: ["smtp_email"]
+
+router_settings:
+  routing_strategy: simple-shuffle
+  redis_url: os.environ/REDIS_URL
+
+model_list:
+  - model_name: poldense-1b
+    litellm_params:
+      model: openai/OPI-PIB/PolDense-1B
+      api_base: http://llama-cpp.example:8000/v1
+      api_key: "os.environ/LLAMA_CPP_API_KEY"
+
+  - model_name: bielik-11B-v3.0
+    litellm_params:
+      model: openai/speakleash/Bielik-11B-v3.0-Instruct-GGUF:Q4_K_M
+      api_base: http://llama-cpp:8001/v1
+      api_key: "os.environ/LLAMA_CPP_API_KEY"
+

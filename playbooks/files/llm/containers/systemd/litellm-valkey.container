@@ -1,0 +1,18 @@
+[Unit]
+Description=Valkey container
+
+[Container]
+ContainerName=litellm-valkey
+Image=registry.access.redhat.com/hi/valkey:latest
+Exec=/etc/valkey/valkey.conf
+Volume=litellm-valkey-data.volume:/data/:Z
+Volume=%h/.config/litellm/valkey.conf:/etc/valkey/valkey.conf:ro,Z
+Volume=%h/.config/litellm/users.acl:/etc/valkey/users.acl:ro,Z
+Network=llm.network
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

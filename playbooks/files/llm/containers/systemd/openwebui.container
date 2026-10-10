@@ -1,0 +1,19 @@
+[Unit]
+Description=Open WebUI - The self-hosted AI interface
+Requires=openwebui-valkey.service litellm.service
+After=openwebui-valkey.service litellm.service
+
+[Container]
+ContainerName=openwebui
+Image=ghcr.io/open-webui/open-webui:slim
+PublishPort=127.0.0.1:8080:8080
+EnvironmentFile=%h/.config/openwebui/openwebui.env
+Volume=openwebui-data.volume:/app/backend/data:rw,Z
+Network=llm.network
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

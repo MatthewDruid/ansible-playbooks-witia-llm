@@ -1,0 +1,9 @@
+---
+- name: Prepare certbot and haproxy for ai services
+  hosts:
+    - peon01
+  become: true
+  roles:
+    - witia.services.certbot
+    - witia.services.haproxy
+

@@ -1,0 +1,3 @@
+user default off
+user openwebui on >openwebui ~* &* +@all -@admin -@dangerous
+

@@ -1,0 +1,18 @@
+[Unit]
+Description=Valkey container
+
+[Container]
+ContainerName=openwebui-valkey
+Image=registry.access.redhat.com/hi/valkey:latest
+Exec=/etc/valkey/valkey.conf
+Volume=openwebui-valkey-data.volume:/data/:Z
+Volume=%h/.config/openwebui/valkey.conf:/etc/valkey/valkey.conf:ro,Z
+Volume=%h/.config/openwebui/users.acl:/etc/valkey/users.acl:ro,Z
+Network=llm.network
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,163 @@
+---
+- name: Prepare Podman Quadlet for llm infrastructure
+  hosts:
+    - peon01
+  vars:
+    quadlet_dir: "~/.config/containers/systemd"
+  handlers:
+    - name: Restart litellm-valkey container
+      ansible.builtin.systemd_service:
+        name: "litellm-valkey"
+        state: restarted
+        scope: user
+        daemon_reload: true
+
+    - name: "Restart litellm container"
+      ansible.builtin.systemd_service:
+        name: "litellm"
+        state: restarted
+        scope: user
+        daemon_reload: true
+
+    - name: Restart openwebui-valkey container
+      ansible.builtin.systemd_service:
+        name: "openwebui-valkey"
+        state: restarted
+        scope: user
+        daemon_reload: true
+
+    - name: "Restart openwebui container"
+      ansible.builtin.systemd_service:
+        name: "openwebui"
+        state: restarted
+        scope: user
+        daemon_reload: true
+  tasks:
+    - name: "Check if {{ quadlet_dir }} exists"
+      ansible.builtin.file:
+        path: "{{ quadlet_dir }}"
+        state: directory
+
+    - name: "Copy network unit"
+      ansible.builtin.copy:
+        dest: "{{ quadlet_dir }}/llm.network"
+        src: "{{ playbook_dir }}/files/llm/containers/systemd/llm.network"
+        mode: "0644"
+
+    - name: "Prepare LiteLLM"
+      vars:
+        conf_dir: "~/.config/litellm"
+      block:
+        - name: "Check if {{ conf_dir }} exists"
+          ansible.builtin.file:
+            path: "{{ conf_dir }}"
+            state: directory
+
+        - name: "Prepare Valkey for LiteLLM"
+          block:
+            - name: "Copy volume unit"
+              ansible.builtin.copy:
+                dest: "{{ quadlet_dir }}/litellm-valkey-data.volume"
+                src: "{{ playbook_dir }}/files/llm/containers/systemd/litellm-valkey-data.volume"
+                mode: "0644"
+
+            - name: "Copy Valkey config"
+              ansible.builtin.copy:
+                dest: "{{ conf_dir }}/valkey.conf"
+                src: "{{ playbook_dir }}/files/llm/litellm/valkey.conf"
+                mode: "0644"
+
+            - name: "Copy Valkey acl file"
+              ansible.builtin.copy:
+                dest: "{{ conf_dir }}/users.acl"
+                src: "{{ playbook_dir }}/files/llm/litellm/users.acl"
+                mode: "0644"
+
+            - name: "Copy Valkey container unit"
+              ansible.builtin.copy:
+                dest: "{{ quadlet_dir }}/litellm-valkey.container"
+                src: "{{ playbook_dir }}/files/llm/containers/systemd/litellm-valkey.container"
+                mode: "0644"
+
+          notify: Restart litellm-valkey container
+
+        - name: "Copy LiteLLM config"
+          ansible.builtin.copy:
+            dest: "{{ conf_dir }}/config.yml"
+            src: "{{ playbook_dir }}/files/llm/litellm/config.yml"
+            mode: "0644"
+          notify: Restart litellm container
+
+        - name: "Copy LiteLLM env file"
+          ansible.builtin.copy:
+            dest: "{{ conf_dir }}/litellm.env"
+            src: "{{ playbook_dir }}/files/llm/litellm/litellm.env"
+            mode: "0644"
+          notify: Restart litellm container
+
+        - name: "Copy LiteLLM container unit"
+          ansible.builtin.copy:
+            dest: "{{ quadlet_dir }}/litellm.container"
+            src: "{{ playbook_dir }}/files/llm/containers/systemd/litellm.container"
+            mode: "0644"
+
+      notify: Restart litellm container
+
+    - name: "Prepare Open WebUI"
+      vars:
+        conf_dir: "~/.config/openwebui"
+      block:
+        - name: "Check if {{ conf_dir }} exists"
+          ansible.builtin.file:
+            path: "{{ conf_dir }}"
+            state: directory
+
+        - name: "Prepare Valkey for Open WebUI"
+          block:
+            - name: "Copy volume unit"
+              ansible.builtin.copy:
+                dest: "{{ quadlet_dir }}/openwebui-valkey-data.volume"
+                src: "{{ playbook_dir }}/files/llm/containers/systemd/openwebui-valkey-data.volume"
+                mode: "0644"
+
+            - name: "Copy Valkey config"
+              ansible.builtin.copy:
+                dest: "{{ conf_dir }}/valkey.conf"
+                src: "{{ playbook_dir }}/files/llm/openwebui/valkey.conf"
+                mode: "0644"
+
+            - name: "Copy Valkey acl file"
+              ansible.builtin.copy:
+                dest: "{{ conf_dir }}/users.acl"
+                src: "{{ playbook_dir }}/files/llm/openwebui/users.acl"
+                mode: "0644"
+
+            - name: "Copy Valkey container unit"
+              ansible.builtin.copy:
+                dest: "{{ quadlet_dir }}/openwebui-valkey.container"
+                src: "{{ playbook_dir }}/files/llm/containers/systemd/openwebui-valkey.container"
+                mode: "0644"
+
+          notify: Restart openwebui-valkey container
+
+        - name: "Copy Open WebUI env file"
+          ansible.builtin.copy:
+            dest: "{{ conf_dir }}/openwebui.env"
+            src: "{{ playbook_dir }}/files/llm/openwebui/openwebui.env"
+            mode: "0644"
+          notify: Restart openwebui container
+
+        - name: "Copy Open WebUI volume unit"
+          ansible.builtin.copy:
+            dest: "{{ quadlet_dir }}/openwebui-data.volume"
+            src: "{{ playbook_dir }}/files/llm/containers/systemd/openwebui-data.volume"
+            mode: "0644"
+
+        - name: "Copy Open WebUI container unit"
+          ansible.builtin.copy:
+            dest: "{{ quadlet_dir }}/openwebui.container"
+            src: "{{ playbook_dir }}/files/llm/containers/systemd/openwebui.container"
+            mode: "0644"
+
+      notify: Restart openwebui container
+

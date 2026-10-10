@@ -1,0 +1,91 @@
+---
+- name: "Prepare Fedora Server host"
+  hosts:
+    - peon01
+  become: true
+  handlers:
+    - name: "Restart sshd service"
+      ansible.builtin.service:
+        name: sshd
+        state: restarted
+  tasks:
+    - name: Install base packages
+      ansible.builtin.package:
+        name:
+          - libarchive
+          - python3
+          - sudo
+          - tar
+          - vim
+          - zip
+          - zsh
+          - podman
+          - podman-compose
+          - cockpit-podman
+          - fastfetch
+        state: present
+
+    - name: Deploy Vim configuration
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/files/vimrc"
+        dest: /etc/vimrc
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Configuring sshd
+      block:
+        - name: Deploy sshd_config
+          ansible.builtin.copy:
+            src: "{{ playbook_dir }}/files/sshd_config"
+            dest: /etc/ssh/sshd_config
+            owner: root
+            group: root
+            mode: '0600'
+
+        - name: Enable sshd service
+          ansible.builtin.service:
+            name: sshd
+            enabled: true
+          notify: Restart sshd service
+
+    - name: Configure secure administrative user
+      block:
+        - name: "Ensure the dedicated primary group exists"
+          ansible.builtin.group:
+            name: "{{ admin.primary_group }}"
+            state: present
+
+        - name: "Create the admin user"
+          ansible.builtin.user:
+            name: "{{ admin.name }}"
+            comment: "{{ admin.comment | default('Administrative User') }}"
+            group: "{{ admin.primary_group }}"
+            groups: "{{ admin.secondary_groups | join(',') }}"
+            shell: "{{ admin.shell | default('/usr/bin/zsh') }}"
+            state: present
+            create_home: true
+            generate_ssh_key: true
+            ssh_key_type: "ed25519"
+            ssh_key_file: ".ssh/id_ed25519"
+
+        - name: "Add ssh authorized keys"
+          ansible.posix.authorized_key:
+            user: "{{ admin.name }}"
+            key: "{{ item }}"
+            state: present
+          loop: "{{ admin.authorized_keys }}"
+
+        - name: "Allow {{ admin.name }} to run any commands"
+          community.general.sudoers:
+            name: "{{ admin.name }}-rule"
+            state: present
+            user: "{{ admin.name }}"
+            commands: "ALL"
+            sudoers_path: "/etc/sudoers.d"
+
+    - name: Lock root
+      ansible.builtin.user:
+        name: root
+        password_lock: true
+

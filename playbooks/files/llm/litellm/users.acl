@@ -1,0 +1,3 @@
+user default off
+user litellm on >litellm ~litellm:* &litellm:* +@all -@admin -@dangerous
+

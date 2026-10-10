@@ -1,0 +1,21 @@
+[Unit]
+Description=LiteLLM proxy
+Requires=litellm-valkey.service
+After=litellm-valkey.service
+
+[Container]
+ContainerName=litellm
+Image=docker.litellm.ai/berriai/litellm:main-stable
+Exec=--port 4000 --config /app/config.yml
+PublishPort=127.0.0.1:4000:4000
+EnvironmentFile=%h/.config/litellm/litellm.env
+Volume=%h/.config/litellm/config.yml:/app/config.yml:ro,Z
+Network=llm.network
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+
+[Install]
+WantedBy=multi-user.target
+

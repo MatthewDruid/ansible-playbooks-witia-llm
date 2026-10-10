@@ -1,0 +1,9 @@
+---
+collections:
+  - name: ansible.posix
+    version: ">=2.2.0"
+
+  - name: https://github.com/MatthewDruid/ansible-collection-witia-services.git
+    type: git
+    version: main
+

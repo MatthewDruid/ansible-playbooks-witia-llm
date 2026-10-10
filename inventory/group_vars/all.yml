@@ -1,0 +1,8 @@
+---
+admin:
+  name: "superuser"
+  primary_group: "superuser"
+  secondary_groups:
+    - "wheel"
+  authorized_keys:
+    - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK9dmOSC0mDxUyB4nF6l/9G7ZJEKbOJAGfK7M3lIgT+q ansible-playbooks-witia-llm"

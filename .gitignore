@@ -1,0 +1,22 @@
+# Ansible temporary files
+*.retry
+*.log
+
+# Secrets and passwords
+.vault_pass
+*.vault
+secrets.yml
+
+# Python venv
+venv/
+.venv/
+__pycache__/
+
+# System files and editors
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+/collections/
+

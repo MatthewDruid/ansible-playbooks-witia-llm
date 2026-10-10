@@ -1,0 +1,11 @@
+---
+certbot:
+  dns_cloudflare_api_token: "{{ vault_dns_cloudflare_api_token }}"
+  email: superuser@example
+  fqdns:
+    - fqdn: litellm.example
+    - fqdn: ai.example
+
+haproxy:
+  config_file: "{{ playbook_dir }}/files/llm/haproxy.conf"
+
