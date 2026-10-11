@@ -3,7 +3,30 @@
   hosts:
     - peon01
   become: true
+  vars:
+    config_path: /usr/local/etc/haproxy
   roles:
     - witia.services.certbot
     - witia.services.haproxy
+  pre_tasks:
+    - name: "Check if {{ config_path }} exists"
+      ansible.builtin.file:
+        path: "{{ config_path }}"
+        state: directory
+        owner: root
+        group: root
+
+    - name: "Copy cloudflare.lst"
+      ansible.builtin.copy:
+        dest: "{{ config_path }}/cloudflare.lst"
+        src: "{{ playbook_dir }}/files/llm/cloudflare.lst"
+        owner: root
+        group: root
+        mode: "0644"
+  tasks:
+    - name: Allow HAProxy to connect to any port
+      ansible.posix.seboolean:
+        name: haproxy_connect_any
+        state: true
+        persistent: true
 

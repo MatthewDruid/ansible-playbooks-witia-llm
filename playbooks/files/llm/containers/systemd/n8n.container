@@ -1,0 +1,19 @@
+[Unit]
+Description=n8n Workflow Automation
+Requires=litellm.service
+After=litellm.service
+
+[Container]
+ContainerName=n8n
+Image=docker.io/n8nio/n8n
+PublishPort=127.0.0.1:5678:5678
+EnvironmentFile=%h/.config/n8n/n8n.env
+Volume=n8n-data.volume:/home/node/.n8n:rw,Z
+Network=llm.network
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

@@ -23,6 +23,8 @@
           - podman-compose
           - cockpit-podman
           - fastfetch
+          - python3-libselinux
+          - python3-libsemanage
         state: present
 
     - name: Deploy Vim configuration

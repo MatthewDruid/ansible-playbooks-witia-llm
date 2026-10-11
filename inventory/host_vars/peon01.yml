@@ -5,6 +5,7 @@ certbot:
   fqdns:
     - fqdn: litellm.example
     - fqdn: ai.example
+    - fqdn: n8n.example
 
 haproxy:
   config_file: "{{ playbook_dir }}/files/llm/haproxy.conf"
