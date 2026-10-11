@@ -1,0 +1,17 @@
+[Unit]
+Description=n8n Task Runners
+Requires=n8n.service
+After=n8n.service
+
+[Container]
+ContainerName=n8n-runners
+Image=docker.io/n8nio/runners:stable
+EnvironmentFile=%h/.config/n8n/n8n-runners.env
+Network=llm.network
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

@@ -39,6 +39,13 @@
         state: restarted
         scope: user
         daemon_reload: true
+
+    - name: "Restart n8n task runners container"
+      ansible.builtin.systemd_service:
+        name: "n8n-runners"
+        state: restarted
+        scope: user
+        daemon_reload: true
   tasks:
     - name: "Check if {{ quadlet_dir }} exists"
       ansible.builtin.file:
@@ -188,5 +195,27 @@
           ansible.builtin.copy:
             dest: "{{ quadlet_dir }}/n8n.container"
             src: "{{ playbook_dir }}/files/llm/containers/systemd/n8n.container"
+            mode: "0644"
+
+    - name: "Prepare n8n task runners"
+      vars:
+        conf_dir: "~/.config/n8n"
+      notify: Restart n8n task runners container
+      block:
+        - name: "Check if {{ conf_dir }} exists"
+          ansible.builtin.file:
+            path: "{{ conf_dir }}"
+            state: directory
+
+        - name: "Copy n8n task runners env file"
+          ansible.builtin.copy:
+            dest: "{{ conf_dir }}/n8n-runners.env"
+            src: "{{ playbook_dir }}/files/llm/n8n/n8n-runners.env"
+            mode: "0644"
+
+        - name: "Copy n8n task runners container unit"
+          ansible.builtin.copy:
+            dest: "{{ quadlet_dir }}/n8n-runners.container"
+            src: "{{ playbook_dir }}/files/llm/containers/systemd/n8n-runners.container"
             mode: "0644"
 
